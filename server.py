@@ -41,7 +41,7 @@ def handle_client(s):
             request = cl.recv(1024).decode()
             print("Received:", request)
             
-            response = "something to send"
+            response = input("soething to ||")
             cl.send(response.encode())
             print("Sent:", response)
             
@@ -59,3 +59,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
