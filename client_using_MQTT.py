@@ -1,88 +1,69 @@
-from umqtt.simple import MQTTClient
-import network
-import ujson as json
+import json
 import time
-import secrets
-
-#configuring settings
-ssid = secrets.ssid
-password = secrets.password
-
-mqtt_broker = 'your_broker_ip'
-client_id = 'pico_unique_id'  # unique for each device
-topic = 'sensor/data'  # publishing topic
-
-#a variable to store last published data so that the same data is not published without any changes.
+from paho.mqtt import client as mqtt_client
 
 
+# Configuration
+broker = 'your_broker_ip'
+# This should match with MQTT broker configuration
+port = 8883  
+topic = "sensor/data"
+client_id = 'pico_unique_id'
+# Assuming the path to your JSON file
+json_file_path = "variable_data.json"
+
+# Global variable to store the last published data
 last_published_data = None
-# connecting to wifi
-def connect_to_wifi(ssid, password):
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    if not wlan.isconnected():
-        print('Connecting to network...')
-        wlan.connect(ssid, password)
-        while not wlan.isconnected():
-            pass
-    print('Network config:', wlan.ifconfig())
 
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to MQTT Broker!")
+    else:
+        print("Failed to connect, return code %d\n", rc)
 
-# Setup for MQTT client and connection
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+    print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+    #dealing with the received data code to be here
+
 def setup_mqtt():
-    client = MQTTClient(client_id, mqtt_broker)
-    client.set_callback(sub_callback)
-    client.connect()
-    client.subscribe(topic.encode())  # Ensure topic is a byte string
-    print(f"Connected to {mqtt_broker}, subscribed to {topic} topic")
+    client = mqtt_client.Client(client_id)
+    client.on_connect = on_connect
+    client.on_message = on_message
+    # MQTT broker requires username and password
+    # client.username_pw_set(username, password)
+    client.connect(broker, port)
     return client
 
-# MQTT callback function
-def sub_callback(topic, msg):
-    print(f"Received message on topic {topic}: {msg}")
-    try:
-        # Deserializing the JSON data
-        data = json.loads(msg)
-        print("Sensor Data:", data)
-        # logic to handle the sensor data to be added here
-    except Exception as e:
-        print("Error processing message:", e)
+def publish(client, topic, msg):
+    result = client.publish(topic, msg)
+    status = result[0]
+    if status == 0:
+        print(f"Send `{msg}` to topic `{topic}`")
+    else:
+        print(f"Failed to send message to topic {topic}")
 
-# a function to open a json file and read the data in it. 
 def read_json_file(filepath):
     try:
         with open(filepath, "r") as file:
-            data = json.load(file)
-        return data
-    except OSError as e:
-        print("Failed to read file:", e)
+            return json.load(file)
+    except Exception as e:
+        print(f"Failed to read file: {e}")
         return None
-    
-# a function to check if the data in the json file has changed from the last time it was published.
-def has_data_changed(new_data, last_data):
-    return new_data != last_data
-
-
-#a function to publish new data if there is any
-def publish_data(client, data):
-    data_json = json.dumps(data)
-    client.publish(topic.encode(), data_json.encode())
-    print("Published new data.")
-
 
 def main():
-    connect_to_wifi(ssid, password)
     client = setup_mqtt()
+    client.loop_start()
+
     global last_published_data
+    current_data = read_json_file(json_file_path)
 
     while True:
-        #reading the json file
-        current_data = read_json_file("variable_data")
-        #checking for updates in data and publishing if any
-        if current_data is not None and has_data_changed(current_data, last_published_data):
-            publish_data(client, current_data)
+        if current_data != last_published_data:
+            publish(client, topic, json.dumps(current_data))
             last_published_data = current_data
-        time.sleep(5)
+        time.sleep(5)  # Check for updates every 5 seconds
 
 if __name__ == "__main__":
     main()
