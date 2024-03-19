@@ -1,0 +1,14 @@
+{
+  "temperature": 22.1,
+  "humidity": 45,
+  "pressure": 1013,
+  "wind_speed": 5.5,
+  "wind_direction": "NE",
+  "precipitation": 0.0,
+  "uv_index": 5,
+  "pm2_5": 12,
+  "soil_moisture": 30,
+  "light_intensity": 1000,
+  "battery_level": 95,
+  "timestamp": "2023-03-30T12:45:00"
+}
