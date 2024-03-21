@@ -1,49 +1,49 @@
 import json
 import time
+import ssl
 from paho.mqtt import client as mqtt_client
 
+# looad configuration from external file
+def load_config(config_file='config.json'):
+    with open(config_file, 'r') as file:
+        return json.load(file)
 
-# Configuration
-broker = 'your_broker_ip'
-# This should match with MQTT broker configuration
-port = 8883  
-topic = "sensor/data"
-client_id = 'pico_unique_id'
-# Assuming the path to your JSON file
-json_file_path = "variable_data.json"
+config = load_config()
 
-# Global variable to store the last published data
+# declaring global variable to store the last published data
 last_published_data = None
 
-# The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT Broker!")
     else:
-        print("Failed to connect, return code %d\n", rc)
+        print(f"Failed to connect, return code {rc}\n")
 
-# The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
-    #dealing with the received data code to be here
 
-def setup_mqtt():
-    client = mqtt_client.Client(client_id)
+def setup_mqtt(config):
+    client = mqtt_client.Client(config["client_id"])
     client.on_connect = on_connect
     client.on_message = on_message
-    # MQTT broker requires username and password
-    # client.username_pw_set(username, password)
-    client.connect(broker, port)
+    
+    # setting TLS for secure connection
+    client.tls_set(ca_certs=config["ca_cert_path"], tls_version=ssl.PROTOCOL_TLSv1_2)
+    client.tls_insecure_set(True)  # currently insecure, for testing. set to false to confirm certifications.
+    
+    client.connect(config["broker"], config["port"])
     return client
 
+#publishing the data to the server.
 def publish(client, topic, msg):
     result = client.publish(topic, msg)
     status = result[0]
     if status == 0:
-        print(f"Send `{msg}` to topic `{topic}`")
+        print(f"Sent `{msg}` to topic `{topic}`")
     else:
         print(f"Failed to send message to topic {topic}")
 
+#reading the json fie of variables.
 def read_json_file(filepath):
     try:
         with open(filepath, "r") as file:
@@ -53,15 +53,15 @@ def read_json_file(filepath):
         return None
 
 def main():
-    client = setup_mqtt()
+    client = setup_mqtt(config)
     client.loop_start()
 
     global last_published_data
-    current_data = read_json_file(json_file_path)
 
     while True:
+        current_data = read_json_file(config["json_file_path"])
         if current_data != last_published_data:
-            publish(client, topic, json.dumps(current_data))
+            publish(client, config["topic"], json.dumps(current_data))
             last_published_data = current_data
         time.sleep(5)  # Check for updates every 5 seconds
 

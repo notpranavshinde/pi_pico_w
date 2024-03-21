@@ -1,0 +1,8 @@
+{
+    "broker": "your_broker_ip",
+    "port": 8883,
+    "topic": "sensor/data",
+    "client_id": "pico_unique_id",
+    "json_file_path": "variable_data.json",
+    "ca_cert_path": "path_to_your_ca_certificate.pem"
+}
