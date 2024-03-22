@@ -7,8 +7,8 @@
   "precipitation": 0.0,
   "uv_index": 5,
   "pm2_5": 12,
-  "soil_moisture": 30,
-  "light_intensity": 1000,
-  "battery_level": 95,
+  "soil_moisture": 23,
+  "light_intensity": 10000,
+  "battery_level": 91,
   "timestamp": "2023-03-30T12:45:00"
 }

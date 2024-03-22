@@ -1,7 +1,10 @@
 import json
 import time
 import ssl
+
 from paho.mqtt import client as mqtt_client
+from paho.mqtt.client import CallbackAPIVersion
+
 
 # looad configuration from external file
 def load_config(config_file='config.json'):
@@ -15,22 +18,30 @@ last_published_data = None
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
-        print("Connected to MQTT Broker!")
+        print("Connection Extablished")
     else:
         print(f"Failed to connect, return code {rc}\n")
+    client.subscribe(config['topic'])
 
 def on_message(client, userdata, msg):
-    print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+    for i in range(101): print("_", end="")
+    print(f"""
+          Received:
+           MSESSAGE: `{msg.payload.decode()}`
+            TOPIC: `{msg.topic}`""")
+    for i in range(101): print("_", end="")
 
 def setup_mqtt(config):
-    client = mqtt_client.Client(config["client_id"])
+    #client = mqtt_client.Client(config["client_id"])
+    """This is a TEMPORARY PATCH, as the updated library would require a lot of rewriting to move to version 2.0"""
+    client = mqtt_client.Client(client_id=config["client_id"], callback_api_version=CallbackAPIVersion.VERSION1)
     client.on_connect = on_connect
     client.on_message = on_message
-    
+    """
     # setting TLS for secure connection
     client.tls_set(ca_certs=config["ca_cert_path"], tls_version=ssl.PROTOCOL_TLSv1_2)
     client.tls_insecure_set(True)  # currently insecure, for testing. set to false to confirm certifications.
-    
+    """
     client.connect(config["broker"], config["port"])
     return client
 
@@ -39,7 +50,14 @@ def publish(client, topic, msg):
     result = client.publish(topic, msg)
     status = result[0]
     if status == 0:
-        print(f"Sent `{msg}` to topic `{topic}`")
+        for i in range(101): print("_", end="")
+        print(f"""
+              Messsage Sent LOG.
+              TOPIC: {topic}
+              MESSAGE: {msg}
+              """)
+        for i in range(11): print("______", end="X")
+        print("")
     else:
         print(f"Failed to send message to topic {topic}")
 
@@ -63,7 +81,7 @@ def main():
         if current_data != last_published_data:
             publish(client, config["topic"], json.dumps(current_data))
             last_published_data = current_data
-        time.sleep(5)  # Check for updates every 5 seconds
+        time.sleep(2)  # Check for updates every 5 seconds
 
 if __name__ == "__main__":
     main()
