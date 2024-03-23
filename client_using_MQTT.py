@@ -27,9 +27,27 @@ def on_message(client, userdata, msg):
     for i in range(101): print("_", end="")
     print(f"""
           Received:
-           MSESSAGE: `{msg.payload.decode()}`
+           MESSAGE: `{msg.payload.decode()}`
             TOPIC: `{msg.topic}`""")
     for i in range(101): print("_", end="")
+
+    # Decode the message payload
+    message_data = msg.payload.decode()
+
+    # Assuming message_data is a JSON string, load it into a Python dictionary
+    try:
+        data = json.loads(message_data)
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON: {e}")
+        return
+
+    # Write the data to variable_data.json
+    try:
+        with open("variable_data.json", "w") as file:
+            json.dump(data, file, indent=4)
+        print("Data written to variable_data.json")
+    except Exception as e:
+        print(f"Error writing to file: {e}")
 
 def setup_mqtt(config):
     #client = mqtt_client.Client(config["client_id"])
