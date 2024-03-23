@@ -1,7 +1,7 @@
 {
-    "broker": "192.168.1.144", 
-    "port": 8883, 
-    "topic": "sensor/data",
-    "client_id": "pico_unique_id",  
+    "broker": "192.168.137.144",
+    "port": 1883,
+    "topic": "data",
+    "client_id": "unique_id",
     "json_file_path": "variable_data.json"
 }
