@@ -1,7 +1,7 @@
 {
-    "broker": "192.168.102.144",
+    "broker": "192.168.5.144",
     "port": 1883,
     "topic": "data",
-    "client_id": "unique_id",
+    "client_id": "client_unique_id",
     "json_file_path": "variable_data.json"
 }

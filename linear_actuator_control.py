@@ -15,6 +15,18 @@ GPIO.setup(ENA, GPIO.OUT)
 pwm = GPIO.PWM(ENA, 100)  # Set frequency to 100 Hz
 pwm.start(0)  # Start PWM with 0% duty cycle
 
+
+import json
+
+def read_json_file(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+            return data
+    except FileNotFoundError:
+        print("File not found")
+        return None
+
 def control_motor(analog_ly_value):
     if analog_ly_value > 0:
         # actuator forward
