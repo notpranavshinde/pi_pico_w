@@ -99,7 +99,7 @@ def main():
         if current_data != last_published_data:
             publish(client, config["topic"], json.dumps(current_data))
             last_published_data = current_data
-        time.sleep(2)  # Check for updates every 5 seconds
+        time.sleep(0.01)  # Check for updates every 5 seconds
 
 if __name__ == "__main__":
     main()
