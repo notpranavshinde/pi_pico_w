@@ -1,4 +1,4 @@
-# pi_pico_w
+\# pi_pico_w
 code for raspberry pi pico w
 
 server.py ad client.py is using basic http
@@ -14,20 +14,20 @@ Install Mosquitto: Follow the installation instructions on the website for your 
 sudo apt-get install mosquitto mosquitto-clients
 Configure Mosquitto
 Create a custom configuration file for Mosquitto, named mosquitto.conf, and insert the following configuration:
-# Set the listener to port 1883 for MQTT (unencrypted)
+\# Set the listener to port 1883 for MQTT (unencrypted)
 listener 1883
 
-# Allow anonymous connections
+\# Allow anonymous connections
 allow_anonymous true
 
-# Enable verbose logging to the console/terminal
+\# Enable verbose logging to the console/terminal
 log_type all
 
-# Specify the log file location (optional)
-#log_dest file /path/to/mosquitto.log
+\# Specify the log file location (optional)
+\#log_dest file /path/to/mosquitto.log
 
-# To also log to the terminal (optional)
-#log_dest stdout
+\# To also log to the terminal (optional)
+\#log_dest stdout
 
 
 Run Mosquitto Server
